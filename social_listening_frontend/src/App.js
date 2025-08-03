@@ -1,8 +1,28 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
-
-// Import Supabase JS client and create a singleton client
 import { createClient } from '@supabase/supabase-js';
+
+// Global error filter for ignoring MetaMask/inpage.js noise.
+if (typeof window !== 'undefined' && !window.__APP_METAMASK_FILTER) {
+  window.__APP_METAMASK_FILTER = true;
+  window.addEventListener(
+    'error',
+    function (e) {
+      if (
+        e.message &&
+        (e.message.includes('Failed to connect to MetaMask') ||
+          (typeof e.filename === 'string' && e.filename.includes('inpage.js')) ||
+          e.message.includes('MetaMask') ||
+          e.message.includes('ethereum'))
+      ) {
+        if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+        return false;
+      }
+      return undefined;
+    },
+    true
+  );
+}
 
 // PUBLIC_INTERFACE
 /**
@@ -114,7 +134,7 @@ function AuthPanel({ onAuth, error }) {
           {mode === 'signIn' ? 'Sign In' : 'Create Account'}
         </button>
       </form>
-      <button className="link" onClick={()=>setMode(mode==='signIn'?'signUp':'signIn')}>
+      <button className="link" onClick={() => setMode(mode === 'signIn' ? 'signUp' : 'signIn')}>
         {mode === 'signIn' ? "Don't have an account? Sign up" : "Already a user? Sign in"}
       </button>
     </div>
@@ -160,20 +180,20 @@ function SearchBar({ onSearch, initial, loading }) {
 /**
  * Trends visualization: simple line chart (SVG)
  */
-function TrendsChart({ data, color="#007bff" }) {
+function TrendsChart({ data, color = "#007bff" }) {
   // data: [{timestamp, score}]
   if (!data || data.length === 0) return <div className="empty-chart">No trends data</div>;
   const W = 320, H = 70, PAD = 16;
-  let minScore = Math.min(...data.map(d=>d.score)), maxScore = Math.max(...data.map(d=>d.score));
+  let minScore = Math.min(...data.map(d => d.score)), maxScore = Math.max(...data.map(d => d.score));
   minScore = Math.min(minScore, 0); maxScore = Math.max(maxScore, 1);
-  const points = data.map((d,i) => {
+  const points = data.map((d, i) => {
     // X: proportional across data points, Y: normalized to min/max
-    const x = PAD + (i * (W-2*PAD)/(data.length-1));
-    const y = H - PAD - ((d.score - minScore)/(maxScore-minScore))*(H-2*PAD);
+    const x = PAD + (i * (W - 2 * PAD) / (data.length - 1));
+    const y = H - PAD - ((d.score - minScore) / (maxScore - minScore)) * (H - 2 * PAD);
     return [x, y];
   });
 
-  const polyline = points.map(([x,y])=>`${x},${y}`).join(' ');
+  const polyline = points.map(([x, y]) => `${x},${y}`).join(' ');
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="trends-chart" width={W} height={H}>
       <polyline
@@ -182,11 +202,11 @@ function TrendsChart({ data, color="#007bff" }) {
         strokeWidth="2"
         points={polyline}
       />
-      {points.map(([x,y],i)=>(
+      {points.map(([x, y], i) => (
         <circle key={i} cx={x} cy={y} r="3" fill={color} />
       ))}
-      <text x={PAD} y={H-2} fontSize="12" fill="#888">{formatDate(data[0].timestamp)}</text>
-      <text x={W-PAD-40} y={H-2} fontSize="12" fill="#888" textAnchor="end">{formatDate(data[data.length-1].timestamp)}</text>
+      <text x={PAD} y={H - 2} fontSize="12" fill="#888">{formatDate(data[0].timestamp)}</text>
+      <text x={W - PAD - 40} y={H - 2} fontSize="12" fill="#888" textAnchor="end">{formatDate(data[data.length - 1].timestamp)}</text>
     </svg>
   );
 }
@@ -272,7 +292,7 @@ function App() {
   const [platforms, setPlatforms] = useState(["Twitter", "Reddit", "Instagram", "YouTube", "Blogs"]);
   const [selectedPlatforms, setSelectedPlatforms] = useState(["Twitter", "Reddit", "Instagram", "YouTube", "Blogs"]);
   const [mentions, setMentions] = useState([]);
-  const [sentiment, setSentiment] = useState({positive:0, neutral:0, negative:0});
+  const [sentiment, setSentiment] = useState({ positive: 0, neutral: 0, negative: 0 });
   const [trends, setTrends] = useState([]);
   const [ws, setWS] = useState(null);
 
@@ -311,7 +331,7 @@ function App() {
     setQuery(keyword);
     // Simulate API fetch using Supabase (generic data structure)
     setMentions([]);
-    setSentiment({positive:0,neutral:0,negative:0});
+    setSentiment({ positive: 0, neutral: 0, negative: 0 });
     setTrends([]);
     try {
       const supabase = getSupabaseClient();
@@ -329,9 +349,9 @@ function App() {
       setMentions(mentionsData);
 
       // Compute sentiment counts
-      let sentimentSummary = {positive:0, neutral:0, negative:0};
-      mentionsData.forEach(m=>{
-        if (['positive','neutral','negative'].includes(m.sentiment)){
+      let sentimentSummary = { positive: 0, neutral: 0, negative: 0 };
+      mentionsData.forEach(m => {
+        if (['positive', 'neutral', 'negative'].includes(m.sentiment)) {
           sentimentSummary[m.sentiment] += 1;
         }
       });
@@ -346,24 +366,24 @@ function App() {
         .in('platform', selectedPlatforms);
 
       if (!trendsError && trendsData) {
-        setTrends(trendsData.map(d=>({timestamp:d.timestamp, score:d.score})));
+        setTrends(trendsData.map(d => ({ timestamp: d.timestamp, score: d.score })));
       } else {
         // fallback simple trend: rolling avg by mention time
         const grouped = {};
-        mentionsData.forEach(m=>{
+        mentionsData.forEach(m => {
           const t = new Date(m.time);
-          const hour = t.getFullYear()+'-'+(t.getMonth()+1)+'-'+t.getDate()+":"+t.getHours();
+          const hour = t.getFullYear() + '-' + (t.getMonth() + 1) + '-' + t.getDate() + ":" + t.getHours();
           if (!grouped[hour]) grouped[hour] = [];
           grouped[hour].push(m.sentiment === 'positive' ? 1 : (m.sentiment === 'neutral' ? 0.5 : 0));
         });
-        const trData = Object.entries(grouped).map(([time, vals])=>({
+        const trData = Object.entries(grouped).map(([time, vals]) => ({
           timestamp: time,
-          score: vals.reduce((a,b)=>a+b,0)/vals.length
+          score: vals.reduce((a, b) => a + b, 0) / vals.length
         }));
         setTrends(trData);
       }
-    } catch(e) {
-      setAuthError('Failed to fetch data: '+e.message);
+    } catch (e) {
+      setAuthError('Failed to fetch data: ' + e.message);
     } finally {
       setSearching(false);
     }
@@ -396,7 +416,7 @@ function App() {
   // Check session on load
   useEffect(() => {
     const supabase = getSupabaseClient();
-    supabase.auth.getSession().then(({data:{session}}) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) setUser(session.user);
     });
     supabase.auth.onAuthStateChange((_event, session) => {
@@ -435,7 +455,7 @@ function App() {
       <header className="main-header">
         <span className="logo">Sentiment<span className="accented">Insights</span></span>
         <nav className="nav">
-          <button className="theme-toggle" onClick={()=>setTheme(theme === 'dark' ? 'light' : 'dark')}>
+          <button className="theme-toggle" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
             {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
           </button>
           {user && (
@@ -471,7 +491,7 @@ function App() {
       </main>
       <footer className="footer">
         <span>
-          &copy; {new Date().getFullYear()} SentimentInsights •{' '}
+          &copy; {new Date().getFullYear()} SentimentInsights &bull;{' '}
           <a href="https://supabase.com/" className="supabase-link" target="_blank" rel="noopener noreferrer">Powered by Supabase</a>
         </span>
       </footer>
