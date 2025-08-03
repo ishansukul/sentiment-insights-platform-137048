@@ -1,82 +1,59 @@
-# Lightweight React Template for KAVIA
+# Social Listening Tool Frontend
 
-This project provides a minimal React template with a clean, modern UI and minimal dependencies.
+A modern, minimalistic React web app for real-time social listening and sentiment analytics.
 
 ## Features
 
-- **Lightweight**: No heavy UI frameworks - uses only vanilla CSS and React
-- **Modern UI**: Clean, responsive design with KAVIA brand styling
-- **Fast**: Minimal dependencies for quick loading times
-- **Simple**: Easy to understand and modify
+- **Keyword/Brand Search**: Query brands or topics across social platforms
+- **Results Dashboard**: Visualize sentiment distribution & key trends
+- **Trends Visualization**: Minimal SVG line charts of sentiment over time
+- **Platform Filtering**: Select or deselect social/data platforms (e.g., Twitter, Reddit, YouTube, Blogs)
+- **Real-Time Data**: Updates in-dashboard when new matching mentions are found
+- **User Authentication**: Secure login/signup (via Supabase Auth)
+- **Export Reports**: Export mention tables as CSV
+- **Dark Minimal UI**: Stylish, mobile-friendly, and on-brand with minimal CSS
 
 ## Getting Started
 
-In the project directory, you can run:
+1. **Install dependencies** (from the social_listening_frontend folder):
 
-### `npm start`
+    ```bash
+    npm install
+    ```
 
-Runs the app in development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+2. **Configure environment variables**:
 
-### `npm test`
+    - Create a `.env` file (not committed to version control) and add:
 
-Launches the test runner in interactive watch mode.
+      ```
+      REACT_APP_SUPABASE_URL=your-supabase-url-here
+      REACT_APP_SUPABASE_KEY=your-supabase-key-here
+      REACT_APP_SITE_URL=http://localhost:3000
+      ```
 
-### `npm run build`
+    - The provided keys are used for Supabase JS client initialization in the frontend.
+    - Make sure your Supabase project has the proper tables: `mentions`, `trends` with appropriate structure (see backend/API).
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+3. **Run the App**:
+
+    ```bash
+    npm start
+    ```
+
+    Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## File Overview
+
+- `src/App.js`: Main app scaffolding and all feature UI/components
+- `src/App.css`: Theme, layout, and dashboard styling
+- `src/index.js`: App entrypoint
 
 ## Customization
 
-### Colors
+- To adjust dark/light theme or colors, see CSS variables at the top of `src/App.css`.
+- For further API/backend integration, edit API calls in `fetchResults` in `src/App.js`.
 
-The main brand colors are defined as CSS variables in `src/App.css`:
+## Deployment
 
-```css
-:root {
-  --kavia-orange: #E87A41;
-  --kavia-dark: #1A1A1A;
-  --text-color: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --border-color: rgba(255, 255, 255, 0.1);
-}
-```
+Standard Create React App deployment steps apply.
 
-### Components
-
-This template uses pure HTML/CSS components instead of a UI framework. You can find component styles in `src/App.css`. 
-
-Common components include:
-- Buttons (`.btn`, `.btn-large`)
-- Container (`.container`)
-- Navigation (`.navbar`)
-- Typography (`.title`, `.subtitle`, `.description`)
-
-## Learn More
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
